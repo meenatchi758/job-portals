@@ -18,7 +18,8 @@ DATABASES = {
 # Other settings
 SECRET_KEY = 'your-secret-key-here'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
