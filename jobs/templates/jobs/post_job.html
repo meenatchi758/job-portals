@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Post a Job - Job Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="dashboard-card">
+            <h2 class="mb-4"><i class="fas fa-plus-circle me-2"></i>Post a New Job</h2>
+            
+            <!-- Debug Information -->
+            <div class="alert alert-info mb-4 d-none" id="debugInfo">
+                <h6><i class="fas fa-bug me-2"></i>Debug Information</h6>
+                <small id="debugContent">
+                    Form submitted: {{ request.method }}<br>
+                    Categories Exist: {{ categories_exist|yesno:"Yes,No" }}
+                </small>
+            </div>
+            
+            {% if not categories_exist %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>No job categories available!</strong> Please contact the administrator.
+            </div>
+            {% endif %}
+
+            <!-- Display form errors at the top -->
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <h6><i class="fas fa-exclamation-triangle me-2"></i>Please correct the following errors:</h6>
+                <ul class="mb-0">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <form method="post" novalidate id="jobForm">
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_title" class="form-label">Job Title *</label>
+                            <input type="text" name="title" id="id_title" class="form-control" 
+                                   value="{{ form.title.value|default:'' }}" 
+                                   placeholder="Enter job title..." required>
+                            {% if form.title.errors %}
+                                <div class="text-danger small">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_category" class="form-label">Job Category *</label>
+                            <select name="category" id="id_category" class="form-control" required>
+                                <option value="">Select a category</option>
+                                {% for category in form.category.field.queryset %}
+                                    <option value="{{ category.id }}" 
+                                        {% if form.category.value == category.id %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.category.errors %}
+                                <div class="text-danger small">{{ form.category.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_job_type" class="form-label">Employment Type *</label>
+                            <select name="job_type" id="id_job_type" class="form-control" required>
+                                <option value="">Select job type</option>
+                                <option value="full_time" {% if form.job_type.value == 'full_time' %}selected{% endif %}>Full Time</option>
+                                <option value="part_time" {% if form.job_type.value == 'part_time' %}selected{% endif %}>Part Time</option>
+                                <option value="contract" {% if form.job_type.value == 'contract' %}selected{% endif %}>Contract</option>
+                                <option value="internship" {% if form.job_type.value == 'internship' %}selected{% endif %}>Internship</option>
+                                <option value="remote" {% if form.job_type.value == 'remote' %}selected{% endif %}>Remote</option>
+                            </select>
+                            {% if form.job_type.errors %}
+                                <div class="text-danger small">{{ form.job_type.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_location" class="form-label">Location *</label>
+                            <input type="text" name="location" id="id_location" class="form-control" 
+                                   value="{{ form.location.value|default:'' }}" 
+                                   placeholder="e.g., New York, NY or Remote" required>
+                            {% if form.location.errors %}
+                                <div class="text-danger small">{{ form.location.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_salary" class="form-label">Salary (optional)</label>
+                            <input type="number" name="salary" id="id_salary" class="form-control" 
+                                   value="{{ form.salary.value|default:'' }}" 
+                                   placeholder="e.g., 50000.00" step="0.01" min="0">
+                            {% if form.salary.errors %}
+                                <div class="text-danger small">{{ form.salary.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_application_deadline" class="form-label">Application Deadline *</label>
+                            <input type="date" name="application_deadline" id="id_application_deadline" 
+                                   class="form-control" value="{{ form.application_deadline.value|default:'' }}" required>
+                            {% if form.application_deadline.errors %}
+                                <div class="text-danger small">{{ form.application_deadline.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-group">
+                        <label for="id_description" class="form-label">Job Description *</label>
+                        <textarea name="description" id="id_description" class="form-control" 
+                                  rows="4" placeholder="Describe the job responsibilities, role, etc..." required>{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                            <div class="text-danger small">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-group">
+                        <label for="id_requirements" class="form-label">Requirements *</label>
+                        <textarea name="requirements" id="id_requirements" class="form-control" 
+                                  rows="4" placeholder="List the requirements for this position..." required>{{ form.requirements.value|default:'' }}</textarea>
+                        {% if form.requirements.errors %}
+                            <div class="text-danger small">{{ form.requirements.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="form-group">
+                        <label for="id_skills_required" class="form-label">Skills Required *</label>
+                        <textarea name="skills_required" id="id_skills_required" class="form-control" 
+                                  rows="3" placeholder="List required skills separated by commas..." required>{{ form.skills_required.value|default:'' }}</textarea>
+                        {% if form.skills_required.errors %}
+                            <div class="text-danger small">{{ form.skills_required.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg me-3" id="submitBtn">
+                        <i class="fas fa-paper-plane me-2"></i>Post Job
+                    </button>
+                    <a href="{% url 'employer_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('jobForm');
+    const debugInfo = document.getElementById('debugInfo');
+    const debugContent = document.getElementById('debugContent');
+    
+    // Show debug info
+    debugInfo.classList.remove('d-none');
+    
+    // Log form state
+    console.log('Form elements:');
+    form.querySelectorAll('input, select, textarea').forEach(field => {
+        console.log(`${field.name}: ${field.value}`);
+    });
+    
+    // Form submission handler
+    form.addEventListener('submit', function(e) {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Posting Job...';
+        
+        // Update debug info
+        debugContent.innerHTML = 'Form submitting...<br>Please check Django console for details.';
+    });
+    
+    // Set minimum date for application deadline to today
+    const deadlineField = document.getElementById('id_application_deadline');
+    if (deadlineField) {
+        const today = new Date().toISOString().split('T')[0];
+        deadlineField.min = today;
+    }
+});
+</script>
+{% endblock %}

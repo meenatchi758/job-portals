@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Apply for {{ job.title }} - Job Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <h2 class="mb-4">Apply for: {{ job.title }}</h2>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Job Details</h5>
+                    <p class="mb-1"><strong>Company:</strong> {{ job.employer.userprofile.company_name|default:job.employer.username }}</p>
+                    <p class="mb-1"><strong>Location:</strong> {{ job.location }}</p>
+                    <p class="mb-1"><strong>Type:</strong> {{ job.get_job_type_display }}</p>
+                    {% if job.salary %}
+                        <p class="mb-0"><strong>Salary:</strong> ${{ job.salary }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if user.userprofile.resume %}
+            <div class="alert alert-success">
+                <i class="fas fa-file-pdf me-2"></i>
+                Your resume <strong>{{ user.userprofile.resume.name }}</strong> is ready to be submitted.
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                You haven't uploaded a resume yet. 
+                <a href="{% url 'profile' %}" class="alert-link">Upload your resume</a> before applying.
+            </div>
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                {{ form.cover_letter|as_crispy_field }}
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-paper-plane me-2"></i>Submit Application
+                    </button>
+                    <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

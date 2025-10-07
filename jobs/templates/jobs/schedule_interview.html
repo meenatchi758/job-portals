@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Schedule Interview - Job Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <h2 class="mb-4">Schedule Interview</h2>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Application Details</h5>
+                    <p class="mb-1"><strong>Applicant:</strong> {{ application.applicant.get_full_name|default:application.applicant.username }}</p>
+                    <p class="mb-1"><strong>Job Position:</strong> {{ application.job.title }}</p>
+                    <p class="mb-1"><strong>Company:</strong> {{ application.job.employer.userprofile.company_name|default:application.job.employer.username }}</p>
+                </div>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.scheduled_date|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.duration|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.interview_type|as_crispy_field }}
+                    </div>
+                </div>
+                
+                {{ form.location_or_link|as_crispy_field }}
+                {{ form.notes|as_crispy_field }}
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-calendar-plus me-2"></i>Schedule Interview
+                    </button>
+                    <a href="{% url 'employer_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const interviewTypeField = document.getElementById('id_interview_type');
+        const locationField = document.getElementById('id_location_or_link');
+        
+        function updateLocationPlaceholder() {
+            if (interviewTypeField.value === 'video') {
+                locationField.placeholder = 'Enter video call link (Zoom, Google Meet, etc.)';
+            } else if (interviewTypeField.value === 'in_person') {
+                locationField.placeholder = 'Enter physical address for the interview';
+            } else {
+                locationField.placeholder = 'Enter phone number or other details';
+            }
+        }
+        
+        interviewTypeField.addEventListener('change', updateLocationPlaceholder);
+        updateLocationPlaceholder(); // Initial call
+    });
+</script>
+{% endblock %}

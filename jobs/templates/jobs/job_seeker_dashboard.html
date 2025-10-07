@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Job Portal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="dashboard-card">
+            <h2 class="mb-4">
+                <i class="fas fa-tachometer-alt me-2"></i>Job Seeker Dashboard
+            </h2>
+            
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h3>{{ applications.count }}</h3>
+                            <p>Total Applications</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h3>{{ applications|length }}</h3>
+                            <p>Active Applications</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h3>{{ interviews.count }}</h3>
+                            <p>Interviews</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h3>0</h3>
+                            <p>Offers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="dashboard-card">
+            <h4 class="mb-4">Recent Applications</h4>
+            
+            {% if applications %}
+            <div class="list-group">
+                {% for application in applications %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">{{ application.job.title }}</h6>
+                        <span class="badge {% if application.status == 'applied' %}bg-primary
+                                          {% elif application.status == 'shortlisted' %}bg-success
+                                          {% elif application.status == 'interview_scheduled' %}bg-info
+                                          {% elif application.status == 'rejected' %}bg-danger
+                                          {% else %}bg-secondary{% endif %} status-badge">
+                            {{ application.get_status_display }}
+                        </span>
+                    </div>
+                    <p class="mb-1 text-muted">{{ application.job.employer.userprofile.company_name|default:application.job.employer.username }}</p>
+                    <small class="text-muted">Applied {{ application.applied_date|timesince }} ago</small>
+                    
+                    {% if application.status == 'interview_scheduled' %}
+                        {% for interview in interviews %}
+                            {% if interview.application == application %}
+                            <div class="mt-2 p-2 bg-light rounded">
+                                <small>
+                                    <strong>Interview Scheduled:</strong><br>
+                                    {{ interview.scheduled_date|date:"F j, Y g:i A" }}<br>
+                                    <em>{{ interview.get_interview_type_display }}</em>
+                                </small>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                <p class="text-muted">You haven't applied to any jobs yet.</p>
+                <a href="{% url 'job_list' %}" class="btn btn-primary">Browse Jobs</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="dashboard-card">
+            <h4 class="mb-4">Upcoming Interviews</h4>
+            
+            {% if interviews %}
+            <div class="list-group">
+                {% for interview in interviews %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">{{ interview.application.job.title }}</h6>
+                        <span class="badge bg-info status-badge">{{ interview.get_interview_type_display }}</span>
+                    </div>
+                    <p class="mb-1">
+                        <i class="fas fa-calendar me-2"></i>{{ interview.scheduled_date|date:"F j, Y" }}
+                    </p>
+                    <p class="mb-1">
+                        <i class="fas fa-clock me-2"></i>{{ interview.scheduled_date|time:"g:i A" }}
+                    </p>
+                    <p class="mb-1 text-muted">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ interview.location_or_link }}
+                    </p>
+                    {% if interview.notes %}
+                    <p class="mb-1"><small>Notes: {{ interview.notes }}</small></p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No upcoming interviews scheduled.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="dashboard-card mt-4">
+            <h4 class="mb-3">Quick Actions</h4>
+            <div class="d-grid gap-2">
+                <a href="{% url 'job_list' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-search me-2"></i>Browse Jobs
+                </a>
+                <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-user-edit me-2"></i>Update Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
